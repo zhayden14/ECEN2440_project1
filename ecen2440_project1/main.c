@@ -4,6 +4,56 @@
 int background;
 //color of the floor, as measured by sensors 0 and 7
 
+
+void PORT1_IRQHandler(void){
+    //save state of IFG register to determine behavior
+    char iflag = P1IV;
+    int i;
+    //clear interrupt flag
+    P1IFG = 0;
+    //switch 1
+    if(iflag & 0x04){
+        //pulse
+        P5OUT = 0x01;
+        for(i = 0; i < 10; i++){}
+        P5OUT = 0x00;
+        //increment interrupt count
+        s1ct++;
+        //LED control
+        if(color & 0x04)
+            //if blue LED on, turn on red
+            color = 0x01;
+        else
+            //turn on next LED
+            color = color << 1;
+    }
+    else if(iflag & 0x0A){
+        //pulse
+        P5OUT = 0x04;
+        for(i = 0; i < 10; i++){}
+        P5OUT = 0x00;
+        //interrupt count
+        s2ct++;
+        //LED control
+        if(color & 0x01)
+            //if red LED on, turn on blue
+            color = 0x04;
+        else
+            //turn on previous LED
+            color = color >> 1;
+    }
+    else{
+        P1OUT |= 0x01;
+        //turn on red LED to indicate error
+    }
+    //zero all but 3 bits to LEDs and send to P2OUT
+    color &= 0x07;
+    P2OUT = color;
+    //reset IFG again (to hopefully negate switch bounce)
+    P1IFG = 0;
+}
+
+
 void main(void)
 {
 	WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;		// stop watchdog timer
