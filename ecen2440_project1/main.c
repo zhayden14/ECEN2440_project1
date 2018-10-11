@@ -77,10 +77,8 @@ void main(void)
 	    background = (irct[0] + irct[7])/2;
 	    suml = (irct[4]+irct[5]+irct[6])/3;
 	    sumr = (irct[1]+irct[2]+irct[3])/3;
-	    if(abs(suml-background) > 20) i++;
-	    else i++;
-	    if(abs(sumr-background) > 20) i++;
-	    else i++;
+
+
 
 	}
 }
