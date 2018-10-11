@@ -4,65 +4,18 @@
 int background;
 //color of the floor, as measured by sensors 0 and 7
 
-
-void PORT1_IRQHandler(void){
-    //save state of IFG register to determine behavior
-    char iflag = P1IV;
-    int i;
-    //clear interrupt flag
-    P1IFG = 0;
-    //switch 1
-    if(iflag & 0x04){
-        //pulse
-        P5OUT = 0x01;
-        for(i = 0; i < 10; i++){}
-        P5OUT = 0x00;
-        //increment interrupt count
-        s1ct++;
-        //LED control
-        if(color & 0x04)
-            //if blue LED on, turn on red
-            color = 0x01;
-        else
-            //turn on next LED
-            color = color << 1;
-    }
-    else if(iflag & 0x0A){
-        //pulse
-        P5OUT = 0x04;
-        for(i = 0; i < 10; i++){}
-        P5OUT = 0x00;
-        //interrupt count
-        s2ct++;
-        //LED control
-        if(color & 0x01)
-            //if red LED on, turn on blue
-            color = 0x04;
-        else
-            //turn on previous LED
-            color = color >> 1;
-    }
-    else{
-        P1OUT |= 0x01;
-        //turn on red LED to indicate error
-    }
-    //zero all but 3 bits to LEDs and send to P2OUT
-    color &= 0x07;
-    P2OUT = color;
-    //reset IFG again (to hopefully negate switch bounce)
-    P1IFG = 0;
-}
+int irct[8];
 
 
 void main(void)
 {
 	WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;		// stop watchdog timer
 
-	//setup port 10
-	P10SEL0 = 0x00;
-	P10SEL1 = 0x00;
-	P10DS = 0xFF;
-	P10OUT = 0xFF;
+	//setup port 7
+	P7SEL0 = 0x00;
+	P7SEL1 = 0x00;
+	P7DS = 0xFF;
+	P7OUT = 0xFF;
 
 	//configure Timer A 0
 	TIMER_A0->CCTL[0] = 0x0080;    // CCI0 toggle
@@ -96,21 +49,31 @@ void main(void)
 
 	while(1){
 	    //take reflectance reading
-	    ir2ct = 0;
-	    ir5ct = 0;
-	    P10DIR = 0xFF;
+	    irct[0] = 0;
+	    irct[1] = 0;
+	    irct[2] = 0;
+	    irct[3] = 0;
+	    irct[4] = 0;
+	    irct[5] = 0;
+	    irct[6] = 0;
+	    irct[7] = 0;
+
+	    P7DIR = 0xFF;
 	    for(i = 0; i < 400; i++){}
-	    P10DIR = 0x00;
-	    while((P10IN&BIT1) || (P10IN&BIT3)){
-	        if(P10IN&BIT1) ir2ct++;
-	        if(P10IN&BIT3) ir5ct++;
+	    P7DIR = 0x00;
+	    while(P7IN){
+	        if(P7IN&BIT0) irct[0]++;
+	        if(P7IN&BIT1) irct[1]++;
+	        if(P7IN&BIT2) irct[2]++;
+	        if(P7IN&BIT3) irct[3]++;
+	        if(P7IN&BIT4) irct[4]++;
+	        if(P7IN&BIT5) irct[5]++;
+	        if(P7IN&BIT6) irct[6]++;
+	        if(P7IN&BIT7) irct[7]++;
 	    }
 
 	    //set motor speeds
-	    if(ir2ct < 200) TIMER_A0->CCR[1] = 19;
-	    else TIMER_A0->CCR[1] =  10;
-	    if(ir5ct < 200) TIMER_A0->CCR[2] = 19;
-	    else TIMER_A0->CCR[2] =  10;
+
 
 	    for(i = 0; i < 4000; i++){}
 	}
