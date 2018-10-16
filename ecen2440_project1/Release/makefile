@@ -135,7 +135,8 @@ BIN_OUTPUTS__QUOTED += \
 
 
 # All Target
-all: ecen2440_project1_0.out
+all: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
+	@$(MAKE) --no-print-directory -Onone "ecen2440_project1_0.out"
 
 # Tool invocations
 ecen2440_project1_0.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
