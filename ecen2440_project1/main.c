@@ -1,4 +1,5 @@
 #include "msp.h"
+#include <stdio.h>
 
 
 int background;
@@ -62,21 +63,20 @@ void main(void)
 	    P7DIR = 0xFF;
 	    for(i = 0; i < 400; i++){}
 	    P7DIR = 0x00;
-	    while(P7IN){
+	    TIMER_A0->CTL &= ~BIT2;
+	    while(P7IN&BIT0){
 	        if(P7IN&BIT0) irct[0]++;
-	        if(P7IN&BIT1) irct[1]++;
-	        if(P7IN&BIT2) irct[2]++;
-	        if(P7IN&BIT3) irct[3]++;
-	        if(P7IN&BIT4) irct[4]++;
-	        if(P7IN&BIT5) irct[5]++;
-	        if(P7IN&BIT6) irct[6]++;
-	        if(P7IN&BIT7) irct[7]++;
+	        //if(P7IN&BIT1) irct[1]++;
+	        //if(P7IN&BIT2) irct[2]++;
+	        //if(P7IN&BIT3) irct[3]++;
+	        //if(P7IN&BIT4) irct[4]++;
+	        //if(P7IN&BIT5) irct[5]++;
+	        //if(P7IN&BIT6) irct[6]++;
+	        //if(P7IN&BIT7) irct[7]++;
 	    }
-
+	    sumr = TIMER_A0->R;
+	   printf("%d\n", sumr);
 	    //set motor speeds
-	    background = (irct[0] + irct[7])/2;
-	    suml = (irct[4]+irct[5]+irct[6])/3;
-	    sumr = (irct[1]+irct[2]+irct[3])/3;
 
 
 
